@@ -1,8 +1,6 @@
 # aish-releases
 
-[aish](https://github.com/Devkid-Til/aish) 的发行分发仓库：提供各平台的一键安装脚本与发行产物。
-
-> 源码在私有仓库 `Devkid-Til/aish`；本仓库公开，只放发行产物，便于直接下载安装。
+aish 的发行分发仓库，提供各平台的一键安装脚本与发行产物。
 
 ## 一键安装
 
@@ -20,8 +18,10 @@ curl -fsSL https://raw.githubusercontent.com/Devkid-Til/aish-releases/main/insta
 
 ## 发行产物
 
-- `aish-<version>-py3-none-any.whl` — 纯 Python wheel，三平台通用
-- `install.sh` — POSIX 一键安装脚本（macOS / Ubuntu / 国产 OS）
-- `install.ps1` — Windows PowerShell 一键安装脚本
+- `install.sh` — POSIX 一键安装脚本
+- `install.ps1` — Windows 一键安装脚本
+- `aish-<version>-py3-none-any.whl` — 通用 wheel
 
-详见 [Releases](https://github.com/Devkid-Til/aish-releases/releases)。
+## 版本
+
+各版本发行物见 [Releases](https://github.com/Devkid-Til/aish-releases/releases)。
