@@ -55,12 +55,13 @@ ok "uv 就绪：$("$UV" --version 2>/dev/null | head -1)"
 
 # ---- 第 2 步：下载发行 wheel 并用 uv 装为全局命令 ----
 say "  下载 aish ${VERSION} wheel…"
-TMP_WHEEL="$(mktemp -t "aish-${VERSION}-XXXXXX").whl"
-trap 'rm -f "$TMP_WHEEL"' EXIT
-curl -fsSL "$WHEEL_URL" -o "$TMP_WHEEL" || die "下载 wheel 失败（${WHEEL_URL}）"
+# 必须用合法的 wheel 文件名（uv 会校验 PEP 427 文件名），故下载到临时目录里保原名。
+TMP_DIR="$(mktemp -d)"
+trap 'rm -rf "$TMP_DIR"' EXIT
+curl -fsSL "$WHEEL_URL" -o "$TMP_DIR/$WHEEL" || die "下载 wheel 失败（${WHEEL_URL}）"
 # uv tool install 为 aish 建独立环境、把 `aish` 暴露到 ~/.local/bin，自带依赖解析。
 # --python 让 uv 在系统 Python 太老/不全时自动下载合适的（免 sudo）。
-if "$UV" tool install --force --python '>=3.9' "$TMP_WHEEL" 2>&1 | tail -5; then
+if "$UV" tool install --force --python '>=3.9' "$TMP_DIR/$WHEEL" 2>&1 | tail -5; then
   :
 else
   die "aish 安装失败（uv tool install）。"
