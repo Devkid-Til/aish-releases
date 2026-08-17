@@ -125,7 +125,7 @@ aish 记得这个会话里的「问 → 答 → 执行 → 结果」，可以追
 | `DASHSCOPE_API_KEY` | 通义千问 DashScope |
 | `OPENROUTER_API_KEY` | OpenRouter |
 
-此外会自动探测本地的 Ollama（`localhost:11434`）、LM Studio（`localhost:1234`），并复用你 Claude Code 里配过的 key。
+此外会自动**探测**本地已在运行的服务：Ollama（`localhost:11434`）、LM Studio（`localhost:1234`）——需你先自行安装并让它们跑着，aish 只探测、不安装；还会复用你 Claude Code 里配过的 key。
 
 aish 自身的控制变量：
 
