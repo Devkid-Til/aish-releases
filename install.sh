@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-VERSION="0.1.0"
+VERSION="0.2.0"
 WHEEL="aish-${VERSION}-py3-none-any.whl"
 WHEEL_URL="https://github.com/Devkid-Til/aish-releases/releases/download/v${VERSION}/${WHEEL}"
 

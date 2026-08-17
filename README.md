@@ -32,7 +32,7 @@ irm https://raw.githubusercontent.com/Devkid-Til/aish-releases/main/install.ps1 
 从 [Releases](https://github.com/Devkid-Til/aish-releases/releases) 下载 `aish-<版本>-py3-none-any.whl`，然后：
 
 ```bash
-uv tool install aish-0.1.0-py3-none-any.whl
+uv tool install aish-0.2.0-py3-none-any.whl
 ```
 
 安装后命令在 `~/.local/bin/aish`。卸载：`bash install.sh --uninstall` / `.\install.ps1 -Uninstall`。

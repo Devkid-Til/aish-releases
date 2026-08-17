@@ -5,7 +5,7 @@ $ErrorActionPreference = "Stop"
 $LocalBin = Join-Path $HOME ".local\bin"
 $UvBin = Join-Path $LocalBin "uv.exe"
 
-$Version = "0.1.0"
+$Version = "0.2.0"
 $Wheel = "aish-$Version-py3-none-any.whl"
 $WheelUrl = "https://github.com/Devkid-Til/aish-releases/releases/download/v$Version/$Wheel"
 
