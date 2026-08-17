@@ -1,16 +1,22 @@
 #!/usr/bin/env bash
-# aish 一键安装脚本：从依赖到可用的 aish，全程免 sudo。
+# aish 一键安装脚本（POSIX / macOS + Linux）：下载发行 wheel 并安装，全程免 sudo。
 #
 # 用法：
-#   bash install.sh            # 从当前仓库安装
+#   curl -fsSL https://raw.githubusercontent.com/Devkid-Til/aish-releases/main/install.sh | bash
 #   bash install.sh --uninstall
 #
 # 设计（实测驱动）：
 #   - 裸 Ubuntu 连 ensurepip 都没有、sudo 又需密码 → 不能依赖系统 python/pip/sudo。
 #     用 uv（单静态二进制，免 sudo 装到 ~/.local/bin）统一管 Python 解释器 + 依赖 +
 #     虚拟环境 + pipx 式命令安装。macOS 与 Linux 同一条路径，行为一致。
+#   - 安装来源是发行 wheel（版本钉死，不依赖本机 git / 源码仓库）。
 #   - 装到 ~/.local/bin/aish（免 sudo），提示用户把它加进 PATH。
 set -euo pipefail
+
+# ---- 发行版本与 wheel 下载地址 ----
+VERSION="0.1.0"
+WHEEL="aish-${VERSION}-py3-none-any.whl"
+WHEEL_URL="https://github.com/Devkid-Til/aish-releases/releases/download/v${VERSION}/${WHEEL}"
 
 # ---- 小工具 ----
 say()  { printf '%s\n' "$*"; }
@@ -19,7 +25,6 @@ warn() { printf '  \033[33m!\033[0m %s\n' "$*"; }
 die()  { printf '\033[31m✗ %s\033[0m\n' "$*" >&2; exit 1; }
 have() { command -v "$1" >/dev/null 2>&1; }
 
-REPO_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 LOCAL_BIN="$HOME/.local/bin"
 UV_BIN="$LOCAL_BIN/uv"
 
@@ -34,7 +39,7 @@ if [[ "${1:-}" == "--uninstall" ]]; then
   exit 0
 fi
 
-say "==> 安装 aish（免 sudo，装到用户目录）"
+say "==> 安装 aish ${VERSION}（免 sudo，装到用户目录）"
 
 # ---- 第 1 步：确保 uv 可用（没有就免 sudo 装到 ~/.local/bin）----
 if ! have uv && [[ ! -x "$UV_BIN" ]]; then
@@ -48,12 +53,14 @@ UV="$(command -v uv || echo "$UV_BIN")"
 [[ -x "$UV" ]] || die "uv 安装失败"
 ok "uv 就绪：$("$UV" --version 2>/dev/null | head -1)"
 
-# ---- 第 2 步：用 uv 装 aish 为全局命令（自动建隔离 venv + 装依赖 + 选合适 Python）----
-say "  安装 aish 及其依赖…"
-mkdir -p "$LOCAL_BIN"
-# uv tool install 会为 aish 建独立环境、把 `aish` 暴露到 ~/.local/bin，自带依赖解析。
+# ---- 第 2 步：下载发行 wheel 并用 uv 装为全局命令 ----
+say "  下载 aish ${VERSION} wheel…"
+TMP_WHEEL="$(mktemp -t "aish-${VERSION}-XXXXXX").whl"
+trap 'rm -f "$TMP_WHEEL"' EXIT
+curl -fsSL "$WHEEL_URL" -o "$TMP_WHEEL" || die "下载 wheel 失败（${WHEEL_URL}）"
+# uv tool install 为 aish 建独立环境、把 `aish` 暴露到 ~/.local/bin，自带依赖解析。
 # --python 让 uv 在系统 Python 太老/不全时自动下载合适的（免 sudo）。
-if "$UV" tool install --force --python '>=3.9' "$REPO_DIR" 2>&1 | tail -5; then
+if "$UV" tool install --force --python '>=3.9' "$TMP_WHEEL" 2>&1 | tail -5; then
   :
 else
   die "aish 安装失败（uv tool install）。"

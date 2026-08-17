@@ -2,9 +2,8 @@
 # aish 一键安装脚本（Windows / PowerShell 版）：从依赖到可用的 aish，全程免管理员。
 #
 # 用法：
-#   .\install.ps1                     # 从当前仓库安装
+#   irm https://raw.githubusercontent.com/Devkid-Til/aish-releases/main/install.ps1 | iex
 #   .\install.ps1 -Uninstall
-#   irm https://raw.githubusercontent.com/Devkid-Til/aish/main/install.ps1 | iex
 #
 # 设计（与 install.sh 同构）：用 uv（单静态二进制，免管理员装到 ~\.local\bin）统一管
 # Python 解释器 + 依赖 + 虚拟环境 + pipx 式命令安装。Windows 与 POSIX 同一条路径。
@@ -13,6 +12,11 @@ param([switch]$Uninstall)
 $ErrorActionPreference = "Stop"
 $LocalBin = Join-Path $HOME ".local\bin"
 $UvBin = Join-Path $LocalBin "uv.exe"
+
+# ---- 发行版本与 wheel 下载地址 ----
+$Version = "0.1.0"
+$Wheel = "aish-$Version-py3-none-any.whl"
+$WheelUrl = "https://github.com/Devkid-Til/aish-releases/releases/download/v$Version/$Wheel"
 
 function Say($m) { Write-Host $m }
 function Ok($m) { Write-Host "  [OK] $m" -ForegroundColor Green }
@@ -47,21 +51,17 @@ if (-not $Uv -and (Test-Path $UvBin)) { $Uv = $UvBin }
 if (-not $Uv) { Die "uv 安装失败" }
 Ok "uv 就绪"
 
-# ---- 第 2 步：用 uv 装 aish 为全局命令（自动建隔离 venv + 装依赖 + 选合适 Python）----
-Say "  安装 aish 及其依赖…"
+# ---- 第 2 步：下载发行 wheel 并用 uv 装为全局命令 ----
+Say "  下载 aish $Version wheel…"
 New-Item -ItemType Directory -Force -Path $LocalBin | Out-Null
-# 安装来源：从本地仓库（脚本文件所在目录）或远程 git（irm|iex 时无本地仓库）。
-$RepoDir = if ($MyInvocation.MyCommand.Path) {
-    Split-Path -Parent $MyInvocation.MyCommand.Path
-} else { $null }
-$InstallSource = if ($RepoDir -and (Test-Path (Join-Path $RepoDir "pyproject.toml"))) {
-    $RepoDir
-} else {
-    "git+https://github.com/Devkid-Til/aish.git"
-}
+$TmpWheel = Join-Path $env:TEMP $Wheel
+Invoke-WebRequest -Uri $WheelUrl -OutFile $TmpWheel
+if (-not (Test-Path $TmpWheel)) { Die "下载 wheel 失败（$WheelUrl）" }
+# uv tool install 为 aish 建独立环境、把 `aish` 暴露到 ~\.local\bin，自带依赖解析。
 # --python 让 uv 在系统 Python 太老/不全时自动下载合适的（免管理员）。
-& $Uv tool install --force --python '>=3.9' $InstallSource
+& $Uv tool install --force --python '>=3.9' $TmpWheel
 if ($LASTEXITCODE -ne 0) { Die "aish 安装失败（uv tool install）。" }
+Remove-Item $TmpWheel -Force -ErrorAction SilentlyContinue
 
 # uv 默认把工具放进 ~\.local\bin；个别环境落到别处，兜底软链。
 if (-not (Test-Path (Join-Path $LocalBin "aish.exe"))) {
