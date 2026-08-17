@@ -127,34 +127,14 @@ aish 记得这个会话里的「问 → 答 → 执行 → 结果」，可以追
 
 此外会自动**探测**本地已在运行的服务：Ollama（`localhost:11434`）、LM Studio（`localhost:1234`）——需你先自行安装并让它们跑着，aish 只探测、不安装；还会复用你 Claude Code 里配过的 key。
 
-aish 自身的控制变量：
-
-| 环境变量 | 作用 |
-|----------|------|
-| `AISH_MODEL` | 覆盖默认模型名 |
-| `AISH_CONFIG_DIR` | 覆盖配置目录（默认 `~/.config/aish`） |
-| `AISH_NO_USER_RC` | 设为 `1` 时不加载你的 shell 配置（排查用） |
-| `AISH_NO_PERSISTENT_SHELL` | 设为 `1` 时每条命令独立执行（排查用） |
-
 ### settings.json
 
-可调参数在 `~/.config/aish/settings.json`（首次运行自动生成，带默认值）：
+在 `~/.config/aish/settings.json`（首次运行自动生成，带默认值）里可调的行为开关：
 
 | 键 | 默认 | 作用 |
 |----|------|------|
-| `max_look_rounds` | 5 | AI 单轮自动只读探查的最大轮数 |
-| `max_total_actions` | 10 | AI 单轮自主动作总数上限 |
-| `auto_diagnose` | `true` | 命令失败且有输出时，自动触发 AI 诊断 |
-| `persist_history` | `true` | 命令历史落盘（跨会话记住 ↑） |
-| `mem_max_turns` | 20 | 会话记忆保留的最近轮数 |
-| `mem_max_total_chars` | 16000 | 会话记忆总字符上限 |
-| `mem_max_output_chars` | 8000 | 单条输出保留上限（超出存本地） |
-| `mem_full_turns` | 4 | 最近几轮给完整内容，更早的压成摘要 |
-| `max_facts` | 50 | 持久事实条数上限 |
-| `max_fact_len` | 200 | 单条事实长度上限 |
-| `keep_session_logs` | 20 | 交互会话日志保留份数 |
-| `keep_history_files` | 30 | 对话历史归档保留份数 |
-| `readonly_whitelist` | `[...]` | AI 可自主执行的只读命令白名单（空数组 = 禁用） |
+| `persist_history` | `true` | 命令历史是否跨会话落盘 |
+| `auto_diagnose` | `true` | 命令失败且有输出时，是否自动触发 AI 诊断 |
 
 ## 命令行用法
 
@@ -162,9 +142,6 @@ aish 自身的控制变量：
 aish                      # 进入交互模式
 aish 查看磁盘占用           # 单条：自然语言
 aish ls -la               # 单条：命令
-aish route <文本>          # 只显示路由结果（command / natural），不执行
-aish translate <文本>      # 只翻译成命令，不执行
-aish --config             # 重新配置后端
 ```
 
 ## 兼容性
